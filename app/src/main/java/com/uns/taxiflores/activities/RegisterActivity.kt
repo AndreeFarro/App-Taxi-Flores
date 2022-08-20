@@ -7,11 +7,14 @@ import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
 import com.uns.taxiflores.databinding.ActivityRegisterBinding
+import com.uns.taxiflores.models.Client
 import com.uns.taxiflores.providers.AuthProvider
+import com.uns.taxiflores.providers.ClientProvider
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     private val authProvider = AuthProvider()
+    private val clientProvider = ClientProvider()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,16 +29,31 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun register(){
         val name = binding.textFieldName.text.toString()
-        val lastname = binding.textFieldLastName.text.toString()
+        val lastName = binding.textFieldLastName.text.toString()
         val email = binding.textFieldEmail.text.toString()
         val phone = binding.textFieldPhone.text.toString()
         val password = binding.textFieldPassword.text.toString()
         val confirmPassword = binding.textFieldConfirmPassword.text.toString()
 
-        if(isValidForm(name,lastname, email, phone, password, confirmPassword)){
+        if(isValidForm(name,lastName, email, phone, password, confirmPassword)){
             authProvider.register(email,password).addOnCompleteListener{
                 if (it.isSuccessful){
-                    Toast.makeText(this@RegisterActivity, "Registro exitoso", Toast.LENGTH_LONG).show()
+                    val client= Client(
+                        id = authProvider.getId(),
+                        name = name,
+                        lastName = lastName,
+                        email = email,
+                        phone = phone
+                    )
+                    clientProvider.create(client).addOnCompleteListener{
+                        if(it.isSuccessful){
+                            Toast.makeText(this@RegisterActivity,"Registro exitoso",Toast.LENGTH_SHORT).show()
+                        }else{
+                            Toast.makeText(this@RegisterActivity,"Hubo un error Almacenando los datos del usuario ${it.exception.toString()}",Toast.LENGTH_SHORT).show()
+                            Log.d("FIREBASE", "error: ${it.exception.toString()}")
+                        }
+                    }
+
                 }else{
                     Toast.makeText(this@RegisterActivity, "Registro fallido ${it.exception.toString()}", Toast.LENGTH_LONG).show()
                     Log.d("FIREBASE","ERROR: ${it.exception.toString()}")

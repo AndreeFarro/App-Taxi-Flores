@@ -12,4 +12,7 @@ class AuthProvider {
         return auth.createUserWithEmailAndPassword(email,password)
     }
 
+    fun getId(): String{
+        return auth.currentUser?.uid ?: ""
+    }
 }
