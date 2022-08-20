@@ -1,9 +1,8 @@
-package com.uns.taxiflores
+package com.uns.taxiflores.activities
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.Toast
 import com.uns.taxiflores.databinding.ActivityMainBinding
@@ -46,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun goToRegister(){
-        val i= Intent(this,RegisterActivity::class.java)
+        val i= Intent(this, RegisterActivity::class.java)
         startActivity(i)
     }
 }

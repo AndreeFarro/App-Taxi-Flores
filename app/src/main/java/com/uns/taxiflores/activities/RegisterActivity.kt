@@ -1,15 +1,17 @@
-package com.uns.taxiflores
+package com.uns.taxiflores.activities
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
-import com.uns.taxiflores.databinding.ActivityMainBinding
 import com.uns.taxiflores.databinding.ActivityRegisterBinding
+import com.uns.taxiflores.providers.AuthProvider
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
+    private val authProvider = AuthProvider()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +33,14 @@ class RegisterActivity : AppCompatActivity() {
         val confirmPassword = binding.textFieldConfirmPassword.text.toString()
 
         if(isValidForm(name,lastname, email, phone, password, confirmPassword)){
-            notification("Form valido")
+            authProvider.register(email,password).addOnCompleteListener{
+                if (it.isSuccessful){
+                    Toast.makeText(this@RegisterActivity, "Registro exitoso", Toast.LENGTH_LONG).show()
+                }else{
+                    Toast.makeText(this@RegisterActivity, "Registro fallido ${it.exception.toString()}", Toast.LENGTH_LONG).show()
+                    Log.d("FIREBASE","ERROR: ${it.exception.toString()}")
+                }
+            }
         }
 
     }
@@ -57,6 +66,11 @@ class RegisterActivity : AppCompatActivity() {
             return false
         }
 
+
+        if (phone.length!=9){
+            notification("Numero de celular no valido")
+            return false
+        }
         if(password != confirmPassword){
             notification("Las contraseñas deben coincidir")
             return false
