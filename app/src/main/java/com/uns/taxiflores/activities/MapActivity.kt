@@ -1,15 +1,20 @@
 package com.uns.taxiflores.activities
 
-
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
 import com.google.android.gms.location.LocationRequest
@@ -18,26 +23,28 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.*
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.ActivityMapBinding
-import java.util.jar.Manifest
+import com.uns.taxiflores.providers.AuthProvider
+import com.uns.taxiflores.providers.GeoProvider
 
 
-class MapActivity : AppCompatActivity(),OnMapReadyCallback, Listener {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
     private lateinit var binding : ActivityMapBinding
     private var googleMap: GoogleMap? = null
     private var easyWayLocation: EasyWayLocation? = null
     private var myLocationLatLng: LatLng? = null
+    private val geoProvider= GeoProvider()
+    private val authProvider= AuthProvider()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMapBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
-        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -56,10 +63,11 @@ class MapActivity : AppCompatActivity(),OnMapReadyCallback, Listener {
             android.Manifest.permission.ACCESS_COARSE_LOCATION
         ))
 
+
     }
 
     val locationPermissions =registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
-        permission ->
+            permission ->
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             when{
                 permission.getOrDefault(android.Manifest.permission.ACCESS_FINE_LOCATION, false)->{
@@ -78,9 +86,9 @@ class MapActivity : AppCompatActivity(),OnMapReadyCallback, Listener {
     }
 
 
+    //ejecuta cada ves que se abre la aplicacio
     override fun onResume() {
         super.onResume()
-        easyWayLocation?.startLocation();
     }
 
     override fun onDestroy() {//CUANDO CERRAMOS LA APP O PASAMOS A OTRA ACTIVYTI
@@ -88,8 +96,12 @@ class MapActivity : AppCompatActivity(),OnMapReadyCallback, Listener {
         easyWayLocation?.endUpdates();
     }
 
+
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
+        googleMap?.uiSettings?.isZoomControlsEnabled = true
+        //easyWayLocation?.startLocation();
+
         if (ActivityCompat.checkSelfPermission(
                 this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -102,17 +114,35 @@ class MapActivity : AppCompatActivity(),OnMapReadyCallback, Listener {
             return
         }
         googleMap?.isMyLocationEnabled = true
+
+
+
+        try {
+            val success = googleMap?.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(this, R.raw.style)
+            )
+            if (!success!!) {
+                Log.d("MAPAS", "No se pudo encontrar el estilo")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.d("MAPAS", "Erro: ${e.toString()}")
+        }
     }
 
     override fun locationOn() {
 
     }
 
+    /**
+     * Actualizacion de la ubicacion en tiempo real
+     */
     override fun currentLocation(location: Location) {
         myLocationLatLng = LatLng(location.latitude, location.longitude) //latitud y longitud de la posicion actual
-        googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(
-            CameraPosition.builder().target(myLocationLatLng!!).zoom(17f).build()
-        ))
+
+        googleMap?.moveCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.builder().target(myLocationLatLng!!).zoom(17f).build()
+            ))
     }
 
     override fun locationCancelled() {
