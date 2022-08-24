@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.location.Location
@@ -32,11 +33,13 @@ import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.ActivityMapBinding
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.GeoProvider
+import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
 
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
@@ -59,6 +62,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
 
     private var isLocationEnabled = false
+
+    private val driverMarkers = ArrayList<Marker>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +111,62 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
                 }
             }
         }
+    }
+
+
+    private fun getNearbyDrivers(){
+        geoProvider.getNearbyDrivers(myLocationLatLng!!,20.0).addGeoQueryEventListener(object : GeoQueryEventListener{
+            override fun onKeyEntered(documentID: String, location: GeoPoint) {
+                for (marker in driverMarkers){
+                    if (marker.tag != null){
+                        if (marker.tag == documentID){
+                            return
+                        }
+                    }
+                }
+                //creamos un nuevo marcador para el conductor conectado
+                val driverLatLng = LatLng(location.latitude, location.longitude)
+                val marker = googleMap?.addMarker(
+                    MarkerOptions().position(driverLatLng).title("Conductor disponible").icon(
+                        BitmapDescriptorFactory.fromResource(R.drawable.car)
+                    )
+                )
+                marker?.tag = documentID
+                driverMarkers.add(marker!!)
+            }
+
+            override fun onKeyExited(documentID: String) {
+                for (marker in driverMarkers){
+                    if (marker.tag != null){
+                        if (marker.tag == documentID){
+                            marker.remove()
+                            driverMarkers.remove(marker)
+                            return
+                        }
+                    }
+                }
+            }
+
+            override fun onKeyMoved(documentID: String, location: GeoPoint) {
+                for (marker in driverMarkers){
+                    if (marker.tag != null){
+                        if (marker.tag == documentID){
+                            marker.position = LatLng(location.latitude, location.longitude)
+                        }
+                    }
+                }
+            }
+
+            override fun onGeoQueryReady() {
+                TODO("Not yet implemented")
+            }
+
+            override fun onGeoQueryError(exception: Exception){
+                TODO("Not yet implemented")
+            }
+
+
+        })
     }
 
 
@@ -271,6 +332,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(
                     CameraPosition.builder().target(myLocationLatLng!!).zoom(15f).build()
                 ))
+            getNearbyDrivers()
             limitSearch()
         }
     }
