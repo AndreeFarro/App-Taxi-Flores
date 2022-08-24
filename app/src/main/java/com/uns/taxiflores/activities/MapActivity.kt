@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -24,6 +25,13 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.maps.android.SphericalUtil
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.ActivityMapBinding
 import com.uns.taxiflores.providers.AuthProvider
@@ -38,6 +46,19 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     private var myLocationLatLng: LatLng? = null
     private val geoProvider= GeoProvider()
     private val authProvider= AuthProvider()
+
+    //VARIABLES PARA GOOGLE PLACES
+    private var places: PlacesClient? = null
+    private var autocompleteOrigin: AutocompleteSupportFragment? = null
+    private var autocompleteDestination: AutocompleteSupportFragment? = null
+    private var originName= ""
+    private var destinationName= ""
+    private var originLatLng: LatLng? = null
+    private var destinationLatLng: LatLng? = null
+
+
+    private var isLocationEnabled = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +84,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             android.Manifest.permission.ACCESS_COARSE_LOCATION
         ))
 
+        startGooglePlaces()
 
     }
 
@@ -84,6 +106,83 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             }
         }
     }
+
+
+    private fun startGooglePlaces(){
+        if(!Places.isInitialized()){
+            Places.initialize(applicationContext, resources.getString(R.string.google_maps_key))
+        }
+
+        places=Places.createClient(this)
+        instanceAutocompleteOrigin()
+        instanceAutocompleteDestination()
+    }
+
+
+    private fun limitSearch(){
+        val northSide = SphericalUtil.computeOffset(myLocationLatLng,5000.0,0.0 )
+        val southSide = SphericalUtil.computeOffset(myLocationLatLng,5000.0,180.0 )
+
+        autocompleteOrigin?.setLocationBias(RectangularBounds.newInstance(southSide,northSide))
+        autocompleteDestination?.setLocationBias(RectangularBounds.newInstance(southSide,northSide))
+    }
+
+
+    private fun instanceAutocompleteOrigin(){
+        autocompleteOrigin = supportFragmentManager.findFragmentById(R.id.placesAutocompleteOrigin) as AutocompleteSupportFragment
+        autocompleteOrigin?.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.LAT_LNG,
+                Place.Field.ADDRESS,
+            )
+        )
+        autocompleteOrigin?.setHint("Lugar de recogida")
+        autocompleteOrigin?.setCountry("PE")
+        autocompleteOrigin?.setOnPlaceSelectedListener(object : PlaceSelectionListener{
+            override fun onPlaceSelected(place: Place) {
+                originName = place.name!!
+                originLatLng = place.latLng
+                Log.d("PLACES","Address: $originName")
+                Log.d("PLACES","Lat: ${originLatLng?.latitude}")
+                Log.d("PLACES","Lat: ${originLatLng?.longitude}")
+            }
+
+            override fun onError(p0: Status) {
+                TODO("Not yet implemented")
+            }
+        })
+
+    }
+    private fun instanceAutocompleteDestination(){
+        autocompleteDestination = supportFragmentManager.findFragmentById(R.id.placesAutocompleteDestination) as AutocompleteSupportFragment
+        autocompleteDestination?.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.LAT_LNG,
+                Place.Field.ADDRESS,
+            )
+        )
+        autocompleteDestination?.setHint("Destino")
+        autocompleteDestination?.setCountry("PE")
+        autocompleteDestination?.setOnPlaceSelectedListener(object : PlaceSelectionListener{
+            override fun onPlaceSelected(place: Place) {
+                destinationName = place.name!!
+                destinationLatLng = place.latLng
+                Log.d("PLACES","Address: $destinationName")
+                Log.d("PLACES","Lat: ${destinationLatLng?.latitude}")
+                Log.d("PLACES","Lat: ${destinationLatLng?.longitude}")
+            }
+
+            override fun onError(p0: Status) {
+                TODO("Not yet implemented")
+            }
+        })
+
+    }
+
 
 
     //ejecuta cada ves que se abre la aplicacio
@@ -143,6 +242,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             CameraUpdateFactory.newCameraPosition(
                 CameraPosition.builder().target(myLocationLatLng!!).zoom(17f).build()
             ))
+
+        if (!isLocationEnabled){
+            isLocationEnabled = true
+            limitSearch()
+        }
     }
 
     override fun locationCancelled() {
