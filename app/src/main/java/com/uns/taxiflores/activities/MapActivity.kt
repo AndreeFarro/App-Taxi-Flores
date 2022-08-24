@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.location.Geocoder
 import android.location.Location
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -108,6 +109,30 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     }
 
 
+    private fun onCameraMove(){
+        googleMap?.setOnCameraIdleListener {
+            try {
+                val geocoder = Geocoder(this)
+                originLatLng = googleMap?.cameraPosition?.target
+
+                if (originLatLng != null){
+                    val addressList = geocoder.getFromLocation(originLatLng?.latitude!!,originLatLng?.longitude!!,1)
+                    if (addressList.size > 0){
+                        val location = addressList[0]
+
+                        val city = location.locality
+                        val country = location.countryName
+                        val address = location.getAddressLine(0)
+                        originName = "$address $city"
+                        autocompleteOrigin?.setText(originName)
+                    }
+                }
+            }catch (e: Exception){
+                Log.d("ERROR", "ERROR: ${e.message.toString()}")
+            }
+        }
+    }
+
     private fun startGooglePlaces(){
         if(!Places.isInitialized()){
             Places.initialize(applicationContext, resources.getString(R.string.google_maps_key))
@@ -199,6 +224,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
         googleMap?.uiSettings?.isZoomControlsEnabled = true
+        onCameraMove()
         //easyWayLocation?.startLocation();
 
         if (ActivityCompat.checkSelfPermission(
@@ -238,13 +264,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     override fun currentLocation(location: Location) {
         myLocationLatLng = LatLng(location.latitude, location.longitude) //latitud y longitud de la posicion actual
 
-        googleMap?.moveCamera(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition.builder().target(myLocationLatLng!!).zoom(17f).build()
-            ))
+
 
         if (!isLocationEnabled){
             isLocationEnabled = true
+            googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.builder().target(myLocationLatLng!!).zoom(15f).build()
+                ))
             limitSearch()
         }
     }

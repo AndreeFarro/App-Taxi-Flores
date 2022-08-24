@@ -13,6 +13,25 @@
         android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="100dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:text="A donde Vamos?"
+        android:textColor="@color/gray"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="@color/shadow"
+        />
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/my_location"
+        android:layout_gravity="center"
+        android:layout_marginBottom="30dp"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="350dp"
