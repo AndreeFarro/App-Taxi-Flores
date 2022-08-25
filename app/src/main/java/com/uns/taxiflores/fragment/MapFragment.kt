@@ -1,31 +1,25 @@
-package com.uns.taxiflores.activities
+package com.uns.taxiflores.fragments
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.location.Location
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.view.WindowManager
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Priority
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -35,16 +29,21 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
-import com.uns.taxiflores.R
-import com.uns.taxiflores.databinding.ActivityMapBinding
+import com.uns.taxiflores.MainActivity
+import com.uns.taxiflores.databinding.FragmentMapBinding
+import com.uns.taxiflores.models.DriverLocation
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.GeoProvider
+import com.uns.taxiflores.utils.CarMoveAnim
 import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
+import com.uns.taxiflores.R
 
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
+class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
-    private lateinit var binding : ActivityMapBinding
+    private var _binding: FragmentMapBinding? = null
+    private val binding get() = _binding!!
+
     private var googleMap: GoogleMap? = null
     private var easyWayLocation: EasyWayLocation? = null
     private var myLocationLatLng: LatLng? = null
@@ -64,17 +63,29 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     private var isLocationEnabled = false
 
     private val driverMarkers = ArrayList<Marker>()
+    private val driversLocation = ArrayList<DriverLocation>()
+
+    private var mapView: MapView? = null
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMapBinding.inflate(layoutInflater)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentMapBinding.inflate(inflater, container, false)
 
-        setContentView(binding.root)
-        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        val mapFragment = childFragmentManager.findFragmentById(com.google.android.gms.maps.R.id.map) as SupportMapFragment?
+        mapFragment!!.getMapAsync(this)
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        //val supportMapFragment: SupportMapFragment = activity.supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        //supportMapFragment.getMapAsync(this)
 
         val locationRequest = LocationRequest.create().apply{
             interval = 0
@@ -83,15 +94,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             smallestDisplacement = 1f
         }
 
-        easyWayLocation = EasyWayLocation(this, locationRequest, false, false, this)
+        easyWayLocation = EasyWayLocation(context, locationRequest, false, false, this)
 
         locationPermissions.launch(arrayOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         ))
 
         startGooglePlaces()
-
     }
 
     val locationPermissions =registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
@@ -113,9 +123,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
         }
     }
 
-
     private fun getNearbyDrivers(){
-        geoProvider.getNearbyDrivers(myLocationLatLng!!,20.0).addGeoQueryEventListener(object : GeoQueryEventListener{
+        if(myLocationLatLng == null) return
+        geoProvider.getNearbyDrivers(myLocationLatLng!!,20.0).addGeoQueryEventListener(object :
+            GeoQueryEventListener {
             override fun onKeyEntered(documentID: String, location: GeoPoint) {
                 for (marker in driverMarkers){
                     if (marker.tag != null){
@@ -128,11 +139,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
                 val driverLatLng = LatLng(location.latitude, location.longitude)
                 val marker = googleMap?.addMarker(
                     MarkerOptions().position(driverLatLng).title("Conductor disponible").icon(
-                        BitmapDescriptorFactory.fromResource(R.drawable.car)
+                        BitmapDescriptorFactory.fromResource(com.google.android.gms.maps.R.drawable.car)
                     )
                 )
                 marker?.tag = documentID
                 driverMarkers.add(marker!!)
+
+                val dl = DriverLocation()
+                dl.id = documentID
+                driversLocation.add(dl)
             }
 
             override fun onKeyExited(documentID: String) {
@@ -141,6 +156,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
                         if (marker.tag == documentID){
                             marker.remove()
                             driverMarkers.remove(marker)
+                            driversLocation.removeAt(getPositionDriver(documentID))
                             return
                         }
                     }
@@ -149,31 +165,55 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
             override fun onKeyMoved(documentID: String, location: GeoPoint) {
                 for (marker in driverMarkers){
+
+                    val start = LatLng(location.latitude, location.longitude)
+                    var end: LatLng? = null
+                    val position = getPositionDriver(marker.tag.toString())
+
                     if (marker.tag != null){
                         if (marker.tag == documentID){
-                            marker.position = LatLng(location.latitude, location.longitude)
+                            //marker.position = LatLng(location.latitude, location.longitude)
+                            if (driversLocation[position].latlng != null){
+                                end = driversLocation[position].latlng
+                            }
+                            driversLocation[position].latlng = LatLng(location.latitude, location.longitude)
+                            if (end != null){
+                                CarMoveAnim.carAnim(marker,end,start)
+                            }
+
                         }
                     }
                 }
             }
 
             override fun onGeoQueryReady() {
-                TODO("Not yet implemented")
+
             }
 
             override fun onGeoQueryError(exception: Exception){
-                TODO("Not yet implemented")
+
             }
 
 
         })
     }
 
+    private fun getPositionDriver(id: String) : Int{
+        var position = 0
+        for (i in driversLocation.indices){
+            if (id == driversLocation[i].id){
+                position = i
+                break
+            }
+        }
+        return position
+    }
+
 
     private fun onCameraMove(){
         googleMap?.setOnCameraIdleListener {
             try {
-                val geocoder = Geocoder(this)
+                val geocoder = Geocoder(context)
                 originLatLng = googleMap?.cameraPosition?.target
 
                 if (originLatLng != null){
@@ -189,17 +229,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
                     }
                 }
             }catch (e: Exception){
-                Log.d("ERROR", "ERROR: ${e.message.toString()}")
+                Log.d("MOVE", "ERROR: ${e.message}")
             }
         }
     }
 
     private fun startGooglePlaces(){
         if(!Places.isInitialized()){
-            Places.initialize(applicationContext, resources.getString(R.string.google_maps_key))
+            Places.initialize(requireContext(), resources.getString(com.google.android.gms.maps.R.string.google_maps_key))
         }
 
-        places=Places.createClient(this)
+        places= Places.createClient(requireContext())
         instanceAutocompleteOrigin()
         instanceAutocompleteDestination()
     }
@@ -215,7 +255,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
 
     private fun instanceAutocompleteOrigin(){
-        autocompleteOrigin = supportFragmentManager.findFragmentById(R.id.placesAutocompleteOrigin) as AutocompleteSupportFragment
+        autocompleteOrigin = getChildFragmentManager().findFragmentById(com.google.android.gms.maps.R.id.placesAutocompleteOrigin) as AutocompleteSupportFragment
         autocompleteOrigin?.setPlaceFields(
             listOf(
                 Place.Field.ID,
@@ -226,7 +266,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
         )
         autocompleteOrigin?.setHint("Lugar de recogida")
         autocompleteOrigin?.setCountry("PE")
-        autocompleteOrigin?.setOnPlaceSelectedListener(object : PlaceSelectionListener{
+        autocompleteOrigin?.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 originName = place.name!!
                 originLatLng = place.latLng
@@ -236,13 +276,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             }
 
             override fun onError(p0: Status) {
-                TODO("Not yet implemented")
+
             }
         })
 
     }
     private fun instanceAutocompleteDestination(){
-        autocompleteDestination = supportFragmentManager.findFragmentById(R.id.placesAutocompleteDestination) as AutocompleteSupportFragment
+        autocompleteDestination = getChildFragmentManager().findFragmentById(com.google.android.gms.maps.R.id.placesAutocompleteDestination) as AutocompleteSupportFragment
         autocompleteDestination?.setPlaceFields(
             listOf(
                 Place.Field.ID,
@@ -253,7 +293,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
         )
         autocompleteDestination?.setHint("Destino")
         autocompleteDestination?.setCountry("PE")
-        autocompleteDestination?.setOnPlaceSelectedListener(object : PlaceSelectionListener{
+        autocompleteDestination?.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 destinationName = place.name!!
                 destinationLatLng = place.latLng
@@ -263,7 +303,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             }
 
             override fun onError(p0: Status) {
-                TODO("Not yet implemented")
+
             }
         })
 
@@ -289,10 +329,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
         //easyWayLocation?.startLocation();
 
         if (ActivityCompat.checkSelfPermission(
-                this,
+                requireContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
+                requireContext(),
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -305,7 +345,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
         try {
             val success = googleMap?.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(this, R.raw.style)
+                MapStyleOptions.loadRawResourceStyle(requireContext(), com.google.android.gms.maps.R.raw.style)
             )
             if (!success!!) {
                 Log.d("MAPAS", "No se pudo encontrar el estilo")
@@ -329,7 +369,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
         if (!isLocationEnabled){
             isLocationEnabled = true
-            googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(
+            googleMap?.moveCamera(
+                CameraUpdateFactory.newCameraPosition(
                     CameraPosition.builder().target(myLocationLatLng!!).zoom(15f).build()
                 ))
             getNearbyDrivers()
@@ -339,5 +380,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
     override fun locationCancelled() {
 
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragment.MapFragment">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
+            class="com.google.android.gms.maps.SupportMapFragment"
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="100dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="A donde Vamos?"
+            android:textColor="@color/gray"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:layout_marginTop="60dp"
+            android:background="@drawable/rounded_button"
+            android:backgroundTint="@color/shadow"
+            />
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/my_location"
+            android:layout_gravity="center"
+            android:layout_marginBottom="30dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:orientation="vertical"
+            >
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginBottom="5dp"
+                android:background="@color/white"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="10dp"
+                >
+
+                <fragment
+                    android:id="@+id/placesAutocompleteOrigin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                    />
+
+
+            </androidx.cardview.widget.CardView>
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginBottom="5dp"
+                android:background="@color/white"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="10dp">
+
+                <fragment
+                    android:id="@+id/placesAutocompleteDestination"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                    />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/bntRequestTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SOLICITAR VIAJE"
+            android:background="@drawable/rounded_button"
+            android:textColor="@color/white"
+            android:layout_gravity="bottom"
+            android:layout_marginHorizontal="60dp"
+            android:layout_marginBottom="50dp"
+            />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

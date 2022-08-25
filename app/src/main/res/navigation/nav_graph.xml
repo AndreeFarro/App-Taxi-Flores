@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/login"
+    >
+
+    <fragment
+        android:id="@+id/login"
+        tools:layout="@layout/fragment_login"
+        android:name="com.uns.aplicationtaxiflores__client.fragment.LoginFragment"
+        >
+
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/register" />
+        <action
+            android:id="@+id/action_login_to_map"
+            app:destination="@id/map" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/register"
+        tools:layout="@layout/fragment_register"
+        android:name="com.uns.aplicationtaxiflores__client.fragment.RegisterFragment"
+        >
+
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/login" />
+        <action
+            android:id="@+id/action_register_to_map"
+            app:destination="@id/map" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/map"
+        tools:layout="@layout/fragment_map"
+        android:name="com.uns.aplicationtaxiflores__client.fragment.MapFragment"
+        >
+
+    </fragment>
+</navigation>
