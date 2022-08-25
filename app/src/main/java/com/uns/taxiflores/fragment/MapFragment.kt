@@ -1,4 +1,4 @@
-package com.uns.taxiflores.fragments
+package com.uns.taxiflores.fragment
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -29,7 +29,6 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
-import com.uns.taxiflores.MainActivity
 import com.uns.taxiflores.databinding.FragmentMapBinding
 import com.uns.taxiflores.models.DriverLocation
 import com.uns.taxiflores.providers.AuthProvider
@@ -37,7 +36,6 @@ import com.uns.taxiflores.providers.GeoProvider
 import com.uns.taxiflores.utils.CarMoveAnim
 import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
 import com.uns.taxiflores.R
-
 
 class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
@@ -75,7 +73,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
     ): View {
         _binding = FragmentMapBinding.inflate(inflater, container, false)
 
-        val mapFragment = childFragmentManager.findFragmentById(com.google.android.gms.maps.R.id.map) as SupportMapFragment?
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
 
 
@@ -139,7 +137,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
                 val driverLatLng = LatLng(location.latitude, location.longitude)
                 val marker = googleMap?.addMarker(
                     MarkerOptions().position(driverLatLng).title("Conductor disponible").icon(
-                        BitmapDescriptorFactory.fromResource(com.google.android.gms.maps.R.drawable.car)
+                        BitmapDescriptorFactory.fromResource(R.drawable.car)
                     )
                 )
                 marker?.tag = documentID
@@ -236,7 +234,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
     private fun startGooglePlaces(){
         if(!Places.isInitialized()){
-            Places.initialize(requireContext(), resources.getString(com.google.android.gms.maps.R.string.google_maps_key))
+            Places.initialize(requireContext(), resources.getString(R.string.google_maps_key))
         }
 
         places= Places.createClient(requireContext())
@@ -255,7 +253,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
 
     private fun instanceAutocompleteOrigin(){
-        autocompleteOrigin = getChildFragmentManager().findFragmentById(com.google.android.gms.maps.R.id.placesAutocompleteOrigin) as AutocompleteSupportFragment
+        autocompleteOrigin = getChildFragmentManager().findFragmentById(R.id.placesAutocompleteOrigin) as AutocompleteSupportFragment
         autocompleteOrigin?.setPlaceFields(
             listOf(
                 Place.Field.ID,
@@ -282,7 +280,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
     }
     private fun instanceAutocompleteDestination(){
-        autocompleteDestination = getChildFragmentManager().findFragmentById(com.google.android.gms.maps.R.id.placesAutocompleteDestination) as AutocompleteSupportFragment
+        autocompleteDestination = getChildFragmentManager().findFragmentById(R.id.placesAutocompleteDestination) as AutocompleteSupportFragment
         autocompleteDestination?.setPlaceFields(
             listOf(
                 Place.Field.ID,
@@ -345,7 +343,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
         try {
             val success = googleMap?.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(requireContext(), com.google.android.gms.maps.R.raw.style)
+                MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.style)
             )
             if (!success!!) {
                 Log.d("MAPAS", "No se pudo encontrar el estilo")

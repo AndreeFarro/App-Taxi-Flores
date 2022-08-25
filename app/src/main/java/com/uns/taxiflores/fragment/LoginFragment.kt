@@ -1,4 +1,4 @@
-package com.uns.taxiflores.fragments
+package com.uns.taxiflores.fragment
 
 import android.os.Bundle
 import android.util.Log

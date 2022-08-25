@@ -9,7 +9,7 @@
     <fragment
         android:id="@+id/login"
         tools:layout="@layout/fragment_login"
-        android:name="com.uns.aplicationtaxiflores__client.fragment.LoginFragment"
+        android:name="com.uns.taxiflores.fragment.LoginFragment"
         >
 
         <action
@@ -23,7 +23,7 @@
     <fragment
         android:id="@+id/register"
         tools:layout="@layout/fragment_register"
-        android:name="com.uns.aplicationtaxiflores__client.fragment.RegisterFragment"
+        android:name="com.uns.taxiflores.fragment.RegisterFragment"
         >
 
         <action
@@ -37,7 +37,7 @@
     <fragment
         android:id="@+id/map"
         tools:layout="@layout/fragment_map"
-        android:name="com.uns.aplicationtaxiflores__client.fragment.MapFragment"
+        android:name="com.uns.taxiflores.fragment.MapFragment"
         >
 
     </fragment>

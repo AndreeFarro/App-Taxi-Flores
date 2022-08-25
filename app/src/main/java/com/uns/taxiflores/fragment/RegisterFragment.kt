@@ -1,6 +1,5 @@
-package com.uns.taxiflores.fragments
+package com.uns.taxiflores.fragment
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.uns.taxiflores.MainActivity
 import com.uns.taxiflores.databinding.FragmentRegisterBinding
 import com.uns.taxiflores.models.Client
 import com.uns.taxiflores.R
@@ -36,9 +34,10 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.btnGoToLogin.setOnClickListener {
+        binding.btnLogin.setOnClickListener {
             findNavController().navigate(R.id.action_register_to_login)
         }
+        binding.btnRegister.setOnClickListener{ register() }
     }
 
     override fun onDestroyView() {
@@ -67,7 +66,7 @@ class RegisterFragment : Fragment() {
                     clientProvider.create(client).addOnCompleteListener{
                         if(it.isSuccessful){
                             Toast.makeText(requireContext(),"Registro exitoso",Toast.LENGTH_SHORT).show()
-                            goToMap()
+                            goToLogin()
                         }else{
                             Toast.makeText(requireContext(),"Hubo un error Almacenando los datos del usuario ${it.exception.toString()}",Toast.LENGTH_SHORT).show()
                             Log.d("FIREBASE", "error: ${it.exception.toString()}")
@@ -92,6 +91,10 @@ class RegisterFragment : Fragment() {
 
     private  fun goToMap(){
         findNavController().navigate(R.id.action_login_to_map)
+    }
+
+    private fun goToLogin(){
+        findNavController().navigate(R.id.action_register_to_login)
     }
 
     private fun isValidForm(
@@ -136,8 +139,6 @@ class RegisterFragment : Fragment() {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun goToLogin(){
-        findNavController().navigate(R.id.action_register_to_login)
-    }
+
 
 }
