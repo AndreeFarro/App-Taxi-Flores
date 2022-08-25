@@ -1,6 +1,7 @@
 package com.uns.taxiflores.fragment
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.location.Geocoder
@@ -11,9 +12,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
 import com.google.android.gms.common.api.Status
@@ -100,7 +103,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
         ))
 
         startGooglePlaces()
+
+        binding.bntRequestTrip.setOnClickListener { goToTripInfo() }
     }
+
+
+
 
     val locationPermissions =registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
             permission ->
@@ -194,6 +202,17 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
 
         })
+    }
+
+
+    private fun goToTripInfo(){
+        if (originLatLng!=null && destinationLatLng!=null){
+            findNavController().navigate(R.id.action_map_to_tripInfo)
+        }
+        else{
+            Toast.makeText(context,"Debes seleccionar el origen y el destino",Toast.LENGTH_LONG).show()
+        }
+
     }
 
     private fun getPositionDriver(id: String) : Int{

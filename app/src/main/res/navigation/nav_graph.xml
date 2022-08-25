@@ -39,6 +39,16 @@
         tools:layout="@layout/fragment_map"
         android:name="com.uns.taxiflores.fragment.MapFragment"
         >
+        <action
+            android:id="@+id/action_map_to_tripInfo"
+            app:destination="@id/tripInfo" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tripInfo"
+        tools:layout="@layout/fragment_trip_info"
+        android:name="com.uns.taxiflores.fragment.MapFragment"
+        >
 
     </fragment>
 </navigation>
