@@ -47,7 +47,7 @@
     <fragment
         android:id="@+id/tripInfo"
         tools:layout="@layout/fragment_trip_info"
-        android:name="com.uns.taxiflores.fragment.MapFragment"
+        android:name="com.uns.taxiflores.fragment.TripInfoFragment"
         >
 
     </fragment>

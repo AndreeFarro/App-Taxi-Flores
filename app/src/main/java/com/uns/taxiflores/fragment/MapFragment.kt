@@ -32,13 +32,14 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
+import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentMapBinding
 import com.uns.taxiflores.models.DriverLocation
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.GeoProvider
 import com.uns.taxiflores.utils.CarMoveAnim
 import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
-import com.uns.taxiflores.R
+
 
 class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
@@ -67,6 +68,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
     private val driversLocation = ArrayList<DriverLocation>()
 
     private var mapView: MapView? = null
+
 
 
     override fun onCreateView(
@@ -208,6 +210,18 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
     private fun goToTripInfo(){
         if (originLatLng!=null && destinationLatLng!=null){
             findNavController().navigate(R.id.action_map_to_tripInfo)
+            val bundle = Bundle()
+
+            bundle.putString("origin", originName)
+            bundle.putString("destination", destinationName)
+            bundle.putDouble("origin_lat", originLatLng?.latitude!!)
+            bundle.putDouble("origin_lng", originLatLng?.longitude!!)
+            bundle.putDouble("destination_lat", destinationLatLng?.latitude!!)
+            bundle.putDouble("destination_lng", destinationLatLng?.longitude!!)
+
+            val tripInfoFragment = TripInfoFragment()
+            tripInfoFragment.arguments = bundle
+            fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,tripInfoFragment)?.commit()
         }
         else{
             Toast.makeText(context,"Debes seleccionar el origen y el destino",Toast.LENGTH_LONG).show()
