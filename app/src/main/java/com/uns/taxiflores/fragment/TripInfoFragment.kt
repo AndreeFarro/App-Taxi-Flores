@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
 import com.example.easywaylocation.draw_path.DirectionUtil
@@ -100,6 +101,34 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
         binding.imageViewBack.setOnClickListener{ activity?.finish() }
 
+        binding.bntConfirmRequest.setOnClickListener {
+            gotToSearchDriver()
+        }
+
+
+    }
+
+    private fun gotToSearchDriver(){
+
+        if (originLatLng!=null && destinationLatLng!=null){
+            findNavController().navigate(R.id.action_tripInfo_to_search)
+            val bundle = Bundle()
+
+            bundle.putString("origin", extraOrigin)
+            bundle.putString("destination", extraDestination)
+            bundle.putDouble("origin_lat", originLatLng?.latitude!!)
+            bundle.putDouble("origin_lng", originLatLng?.longitude!!)
+            bundle.putDouble("destination_lat", destinationLatLng?.latitude!!)
+            bundle.putDouble("destination_lng", destinationLatLng?.longitude!!)
+
+            val searchFragment = SearchFragment()
+            searchFragment.arguments = bundle
+            fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,searchFragment)?.commit()
+
+        }
+        else{
+            Toast.makeText(context,"Debes seleccionar el origen y el destino",Toast.LENGTH_LONG).show()
+        }
 
 
     }
@@ -109,15 +138,13 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
         configProvider.getPrices().addOnSuccessListener { document ->
             if (document.exists()){
                 val prices = document.toObject(Prices::class.java) //DOCUMENTO CON LA INFORMACION
-                Log.d("PRICES", "totalDistance: ${prices}")
                 val totalDistance = distance * prices?.km!!
-                Log.d("PRICES", "totalDistance: $totalDistance")
-                val totalTime = time * prices?.min!!
+                val totalTime = time * prices.min!!
                 var total =totalDistance + totalTime
-                total = if (total < 5.0) prices?.minValue!! else total
+                total = if (total < 5.0) prices.minValue!! else total
 
-                var minTotal = total - prices?.difference!!
-                var maxTotal = total + prices?.difference
+                val minTotal = total - prices.difference!!
+                val maxTotal = total + prices.difference
 
                 val minTotalString = String.format("%.1f",minTotal)
                 val maxTotalString = String.format("%.1f",maxTotal)

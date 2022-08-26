@@ -50,5 +50,16 @@
         android:name="com.uns.taxiflores.fragment.TripInfoFragment"
         >
 
+        <action
+            android:id="@+id/action_tripInfo_to_search"
+            app:destination="@id/search" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/search"
+        tools:layout="@layout/fragment_search"
+        android:name="com.uns.taxiflores.fragment.SearchFragment"
+        >
+
     </fragment>
 </navigation>

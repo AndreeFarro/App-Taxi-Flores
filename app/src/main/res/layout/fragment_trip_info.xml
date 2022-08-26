@@ -140,7 +140,7 @@
                             android:id="@+id/textViewTimeAndDistance"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tiempo y distancia"
+                            android:text="0 mins - 0 km"
                             android:maxLines="2"
                             android:textSize="14sp"/>
 
@@ -175,7 +175,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Precio"
+                                android:text="Precio aproximado del vije"
                                 android:textSize="13sp"
                                 android:textStyle="bold"/>
 
@@ -183,7 +183,7 @@
                                 android:id="@+id/textViewPrecio"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Calle falsa"
+                                android:text="S/0.0"
                                 android:maxLines="2"
                                 android:textSize="14sp"/>
 
@@ -200,7 +200,7 @@
 
 
         <Button
-            android:id="@+id/bntConfirmReques"
+            android:id="@+id/bntConfirmRequest"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="CONFIRMAR SOLICITUD"
