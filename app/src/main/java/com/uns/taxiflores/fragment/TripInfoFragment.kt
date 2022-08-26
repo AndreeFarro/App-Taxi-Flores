@@ -22,6 +22,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentTripInfoBinding
+import com.uns.taxiflores.models.Prices
+import com.uns.taxiflores.providers.ConfigProvider
 
 
 class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil.DirectionCallBack{
@@ -49,6 +51,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
     private var isBundle: Boolean? = true
 
+    private var configProvider = ConfigProvider()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -70,7 +74,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
             originLatLng = LatLng(extraOrigin_lat,extraOrigin_lng)
             destinationLatLng = LatLng(extraDestination_lat,extraDestination_lng)
         }else{
-            Toast.makeText(context, "Error we", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
         }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
@@ -99,6 +103,30 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
 
     }
+
+
+    private fun getPrices(distance : Double, time : Double){
+        configProvider.getPrices().addOnSuccessListener { document ->
+            if (document.exists()){
+                val prices = document.toObject(Prices::class.java) //DOCUMENTO CON LA INFORMACION
+                Log.d("PRICES", "totalDistance: ${prices}")
+                val totalDistance = distance * prices?.km!!
+                Log.d("PRICES", "totalDistance: $totalDistance")
+                val totalTime = time * prices?.min!!
+                var total =totalDistance + totalTime
+                total = if (total < 5.0) prices?.minValue!! else total
+
+                var minTotal = total - prices?.difference!!
+                var maxTotal = total + prices?.difference
+
+                val minTotalString = String.format("%.1f",minTotal)
+                val maxTotalString = String.format("%.1f",maxTotal)
+
+                binding.textViewPrecio.text = "S/$minTotalString - $maxTotalString"
+            }
+        }
+    }
+
 
     private fun addOriginMarker(){
         if (originLatLng == null) return
@@ -194,6 +222,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
         val timeFormat = String.format("%.2f",time)
         val distanceFormat = String.format("%.2f",distance)
+
+        getPrices(distance,time)
 
         binding.textViewTimeAndDistance.text = "$timeFormat mins - $distanceFormat km"
 
