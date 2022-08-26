@@ -47,6 +47,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
     private var markerOrigin: Marker? = null
     private var markerDestination: Marker? = null
 
+    private var isBundle: Boolean? = true
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -56,12 +58,15 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
         val bundle = this.arguments
         if (bundle != null) {
+            isBundle = true
             extraOrigin = bundle.getString("origin").toString()
             extraDestination = bundle.getString("destination").toString()
+
             extraOrigin_lat = bundle.getDouble("origin_lat")
             extraOrigin_lng = bundle.getDouble("origin_lng")
             extraDestination_lat = bundle.getDouble("destination_lat")
             extraDestination_lng = bundle.getDouble("destination_lng")
+
             originLatLng = LatLng(extraOrigin_lat,extraOrigin_lng)
             destinationLatLng = LatLng(extraDestination_lat,extraDestination_lng)
         }else{
@@ -96,11 +101,13 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
     }
 
     private fun addOriginMarker(){
+        if (originLatLng == null) return
         markerOrigin=googleMap?.addMarker(MarkerOptions().position(originLatLng!!).title("Mi posicion")
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.icons_location_person)))
     }
 
     private fun addDestinationMarker(){
+        if (destinationLatLng == null) return
         markerDestination=googleMap?.addMarker(MarkerOptions().position(destinationLatLng!!).title("Llegada")
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.icons_pin)))
     }
@@ -108,6 +115,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
 
     private fun easyDrawRoute(){
+        if (originLatLng== null || destinationLatLng==null) return
         wayPoints.add(originLatLng!!)
         wayPoints.add(destinationLatLng!!)
         directionUtil=DirectionUtil.Builder()
@@ -131,10 +139,12 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
         googleMap = map
         googleMap?.uiSettings?.isZoomControlsEnabled = true
 
-        googleMap?.moveCamera(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition.builder().target(originLatLng!!).zoom(13f).build()
-            ))
+        if(originLatLng != null){
+            googleMap?.moveCamera(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.builder().target(originLatLng!!).zoom(14f).build()
+                ))
+        }
 
         easyDrawRoute()
         addOriginMarker()
@@ -173,6 +183,21 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
         polyLineDetailsMap: HashMap<String, PolyLineDataBean>,
         polyLineDetailsArray: ArrayList<PolyLineDataBean>
     ) {
+        var distance = polyLineDetailsArray[1].distance.toDouble()
+        var time = polyLineDetailsArray[1].time.toDouble()
+
+        distance = if(distance < 1000.0) 1000.0 else distance
+        time = if(time < 60.0) 60.0 else time
+
+        distance = distance / 1000
+        time = time / 60
+
+        val timeFormat = String.format("%.2f",time)
+        val distanceFormat = String.format("%.2f",distance)
+
+        binding.textViewTimeAndDistance.text = "$timeFormat mins - $distanceFormat km"
+
+
         directionUtil.drawPath(WAY_POINT_TAG)
     }
 }
