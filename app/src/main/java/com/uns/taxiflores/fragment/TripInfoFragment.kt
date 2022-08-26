@@ -11,18 +11,20 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
+import com.example.easywaylocation.draw_path.DirectionUtil
+import com.example.easywaylocation.draw_path.PolyLineDataBean
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.*
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentTripInfoBinding
 
 
-class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener{
+class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil.DirectionCallBack{
     private var _binding: FragmentTripInfoBinding? = null
     private val binding get() = _binding!!
     private var googleMap: GoogleMap? = null
@@ -37,6 +39,13 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener{
 
     private var originLatLng: LatLng? = null
     private var destinationLatLng: LatLng? = null
+
+    private var wayPoints: ArrayList<LatLng> = ArrayList()
+    private val WAY_POINT_TAG ="way_point_tag"
+    private lateinit var directionUtil : DirectionUtil
+
+    private var markerOrigin: Marker? = null
+    private var markerDestination: Marker? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,9 +95,50 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener{
 
     }
 
+    private fun addOriginMarker(){
+        markerOrigin=googleMap?.addMarker(MarkerOptions().position(originLatLng!!).title("Mi posicion")
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.icons_location_person)))
+    }
+
+    private fun addDestinationMarker(){
+        markerDestination=googleMap?.addMarker(MarkerOptions().position(destinationLatLng!!).title("Llegada")
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.icons_pin)))
+    }
+
+
+
+    private fun easyDrawRoute(){
+        wayPoints.add(originLatLng!!)
+        wayPoints.add(destinationLatLng!!)
+        directionUtil=DirectionUtil.Builder()
+            .setDirectionKey(resources.getString(R.string.google_maps_key))
+            .setOrigin(originLatLng!!)
+            .setWayPoints(wayPoints)
+            .setGoogleMap(googleMap!!)
+            .setPolyLinePrimaryColor(R.color.back)
+            .setPolyLineWidth(10)
+            .setPathAnimation(true)
+            .setCallback(this)
+            .setDestination(destinationLatLng!!)
+            .build()
+
+        directionUtil.initPath()
+
+    }
+
+
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
         googleMap?.uiSettings?.isZoomControlsEnabled = true
+
+        googleMap?.moveCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.builder().target(originLatLng!!).zoom(13f).build()
+            ))
+
+        easyDrawRoute()
+        addOriginMarker()
+        addDestinationMarker()
 
         try {
             val success = googleMap?.setMapStyle(
@@ -117,5 +167,12 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener{
     override fun onDestroy() {//CUANDO CERRAMOS LA APP O PASAMOS A OTRA ACTIVYTI
         super.onDestroy()
         easyWayLocation?.endUpdates();
+    }
+
+    override fun pathFindFinish(
+        polyLineDetailsMap: HashMap<String, PolyLineDataBean>,
+        polyLineDetailsArray: ArrayList<PolyLineDataBean>
+    ) {
+        directionUtil.drawPath(WAY_POINT_TAG)
     }
 }
