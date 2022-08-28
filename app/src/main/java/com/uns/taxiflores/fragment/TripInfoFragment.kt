@@ -64,6 +64,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
         val bundle = this.arguments
         if (bundle != null) {
             isBundle = true
+
             extraOrigin = bundle.getString("origin").toString()
             extraDestination = bundle.getString("destination").toString()
 
