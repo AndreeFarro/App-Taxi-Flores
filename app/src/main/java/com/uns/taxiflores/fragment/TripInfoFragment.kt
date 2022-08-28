@@ -39,6 +39,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
     private var extraOrigin_lng :Double= 0.0
     private var extraDestination_lat :Double= 0.0
     private var extraDestination_lng :Double= 0.0
+    private var time :Double= 0.0
+    private var distance :Double= 0.0
 
     private var originLatLng: LatLng? = null
     private var destinationLatLng: LatLng? = null
@@ -54,30 +56,28 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
     private var configProvider = ConfigProvider()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            extraOrigin = it.getString("origin").toString()
+            extraDestination = it.getString("destination").toString()
+
+            extraOrigin_lat = it.getDouble("origin_lat")
+            extraOrigin_lng = it.getDouble("origin_lng")
+            extraDestination_lat = it.getDouble("destination_lat")
+            extraDestination_lng = it.getDouble("destination_lng")
+
+            originLatLng = LatLng(extraOrigin_lat,extraOrigin_lng)
+            destinationLatLng = LatLng(extraDestination_lat,extraDestination_lng)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTripInfoBinding.inflate(inflater, container, false)
-
-        val bundle = this.arguments
-        if (bundle != null) {
-            isBundle = true
-
-            extraOrigin = bundle.getString("origin").toString()
-            extraDestination = bundle.getString("destination").toString()
-
-            extraOrigin_lat = bundle.getDouble("origin_lat")
-            extraOrigin_lng = bundle.getDouble("origin_lng")
-            extraDestination_lat = bundle.getDouble("destination_lat")
-            extraDestination_lng = bundle.getDouble("destination_lng")
-
-            originLatLng = LatLng(extraOrigin_lat,extraOrigin_lng)
-            destinationLatLng = LatLng(extraDestination_lat,extraDestination_lng)
-        }else{
-            Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
-        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
@@ -121,6 +121,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
             bundle.putDouble("origin_lng", originLatLng?.longitude!!)
             bundle.putDouble("destination_lat", destinationLatLng?.latitude!!)
             bundle.putDouble("destination_lng", destinationLatLng?.longitude!!)
+            bundle.putDouble("time", time)
+            bundle.putDouble("distance", distance)
 
             val searchFragment = SearchFragment()
             searchFragment.arguments = bundle
@@ -239,8 +241,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
         polyLineDetailsMap: HashMap<String, PolyLineDataBean>,
         polyLineDetailsArray: ArrayList<PolyLineDataBean>
     ) {
-        var distance = polyLineDetailsArray[1].distance.toDouble()
-        var time = polyLineDetailsArray[1].time.toDouble()
+        distance = polyLineDetailsArray[1].distance.toDouble()
+        time = polyLineDetailsArray[1].time.toDouble()
 
         distance = if(distance < 1000.0) 1000.0 else distance
         time = if(time < 60.0) 60.0 else time

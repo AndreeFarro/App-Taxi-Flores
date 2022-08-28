@@ -6,12 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
-import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentSearchBinding
-import com.uns.taxiflores.databinding.FragmentTripInfoBinding
+import com.uns.taxiflores.models.Booking
 import com.uns.taxiflores.providers.AuthProvider
+import com.uns.taxiflores.providers.BookingProvider
 import com.uns.taxiflores.providers.GeoProvider
 import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
 
@@ -26,6 +27,8 @@ class SearchFragment : Fragment() {
     private var extraOrigin_lng :Double= 0.0
     private var extraDestination_lat :Double= 0.0
     private var extraDestination_lng :Double= 0.0
+    private var extraTime :Double= 0.0
+    private var extraDistance :Double= 0.0
 
     private var originLatLng: LatLng? = null
     private var destinationLatLng: LatLng? = null
@@ -38,31 +41,65 @@ class SearchFragment : Fragment() {
     private var driverLatLng: LatLng? = null
     private var limitRadius = 20
 
+    private val bookingProvider = BookingProvider()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            extraOrigin = it.getString("origin").toString()
+            extraDestination = it.getString("destination").toString()
+
+            extraOrigin_lat = it.getDouble("origin_lat")
+            extraOrigin_lng = it.getDouble("origin_lng")
+            extraDestination_lat = it.getDouble("destination_lat")
+            extraDestination_lng = it.getDouble("destination_lng")
+            extraTime = it.getDouble("time")
+            extraDistance = it.getDouble("distance")
+
+            originLatLng = LatLng(extraOrigin_lat, extraOrigin_lng)
+            destinationLatLng = LatLng(extraDestination_lat, extraDestination_lng)
+        }
+
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
-        val bundle = this.arguments
-        if (bundle != null) {
-            extraOrigin = bundle.getString("origin").toString()
-            extraDestination = bundle.getString("destination").toString()
+        getClosestDriver()
 
-            extraOrigin_lat = bundle.getDouble("origin_lat")
-            extraOrigin_lng = bundle.getDouble("origin_lng")
-            extraDestination_lat = bundle.getDouble("destination_lat")
-            extraDestination_lng = bundle.getDouble("destination_lng")
-
-            originLatLng = LatLng(extraOrigin_lat, extraOrigin_lng)
-            destinationLatLng = LatLng(extraDestination_lat, extraDestination_lng)
-            getClosestDriver()
-        }
         return binding.root
 
 
     }
 
+    private fun createBooking(idDriver: String){
+        val booking = Booking(
+        idClient = authProvider.getId(),
+            idDriver = idDriver,
+            origin = extraOrigin,
+            destination = extraDestination,
+            status = "create",
+            time = extraTime,
+            km = extraDistance,
+            originLat = extraOrigin_lat,
+            originLng = extraOrigin_lat,
+            destinationLat = extraDestination_lat,
+            destinationLng = extraDestination_lng
+        )
+        bookingProvider.create(booking).addOnCompleteListener{
+            if (it.isSuccessful){
+                Toast.makeText(context, "Datos del viaje creados", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(context, "error al traer datos", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
     private fun getClosestDriver(){
+        if (originLatLng == null) return
         geoProvider.getNearbyDrivers(originLatLng!!,radius).addGeoQueryEventListener(object : GeoQueryEventListener{
             override fun onKeyEntered(documentID: String, location: GeoPoint) {
                 if(!isDriverFound){
@@ -71,6 +108,7 @@ class SearchFragment : Fragment() {
                     Log.d("FIRESTORE","Conductor id: $idDriver")
                     driverLatLng = LatLng(location.latitude,location.longitude)
                     binding.textViewSearch.text = "CONDUCTOR ENCONTRADO\nESPERANDO RESPUESTA"
+                    createBooking(documentID)
                 }
 
             }
