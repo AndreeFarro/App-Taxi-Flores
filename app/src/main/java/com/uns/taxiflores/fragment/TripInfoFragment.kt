@@ -112,7 +112,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
     private fun gotToSearchDriver(){
 
         if (originLatLng!=null && destinationLatLng!=null){
-            findNavController().navigate(R.id.action_tripInfo_to_search)
+            //findNavController().navigate(R.id.action_tripInfo_to_search)
             val bundle = Bundle()
 
             bundle.putString("origin", extraOrigin)
@@ -125,7 +125,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
             bundle.putDouble("distance", distance)
 
             val searchFragment = SearchFragment()
-            searchFragment.arguments = bundle
+            SearchFragment().arguments = bundle
+            //findNavController().navigate(R.id.action_tripInfo_to_search)
             fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,searchFragment)?.commit()
 
         }
