@@ -209,7 +209,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
     private fun goToTripInfo(){
         if (originLatLng!=null && destinationLatLng!=null){
-            //findNavController().navigate(R.id.action_map_to_tripInfo)
+            findNavController().navigate(R.id.action_map_to_tripInfo)
             val bundle = Bundle()
 
             bundle.putString("origin", originName)
