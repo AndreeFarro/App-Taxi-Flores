@@ -43,8 +43,12 @@ class SearchFragment : Fragment() {
 
     private val bookingProvider = BookingProvider()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
+
         arguments?.let {
             extraOrigin = it.getString("origin").toString()
             extraDestination = it.getString("destination").toString()
@@ -58,16 +62,8 @@ class SearchFragment : Fragment() {
 
             originLatLng = LatLng(extraOrigin_lat, extraOrigin_lng)
             destinationLatLng = LatLng(extraDestination_lat, extraDestination_lng)
+            getClosestDriver()
         }
-
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentSearchBinding.inflate(inflater, container, false)
-        getClosestDriver()
 
         return binding.root
 

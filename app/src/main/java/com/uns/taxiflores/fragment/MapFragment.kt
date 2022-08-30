@@ -87,8 +87,6 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //val supportMapFragment: SupportMapFragment = activity.supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
-        //supportMapFragment.getMapAsync(this)
 
         val locationRequest = LocationRequest.create().apply{
             interval = 0

@@ -52,12 +52,16 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
     private var markerOrigin: Marker? = null
     private var markerDestination: Marker? = null
 
-    private var isBundle: Boolean? = true
-
     private var configProvider = ConfigProvider()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentTripInfoBinding.inflate(inflater, container, false)
+
         arguments?.let {
             extraOrigin = it.getString("origin").toString()
             extraDestination = it.getString("destination").toString()
@@ -69,18 +73,10 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
             originLatLng = LatLng(extraOrigin_lat,extraOrigin_lng)
             destinationLatLng = LatLng(extraDestination_lat,extraDestination_lng)
+
+            val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+            mapFragment!!.getMapAsync(this)
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentTripInfoBinding.inflate(inflater, container, false)
-
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment!!.getMapAsync(this)
 
         return binding.root
     }
@@ -125,7 +121,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
             bundle.putDouble("distance", distance)
 
             val searchFragment = SearchFragment()
-            SearchFragment().arguments = bundle
+            searchFragment.arguments = bundle
             //findNavController().navigate(R.id.action_tripInfo_to_search)
             fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,searchFragment)?.commit()
 
@@ -133,9 +129,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
         else{
             Toast.makeText(context,"Debes seleccionar el origen y el destino",Toast.LENGTH_LONG).show()
         }
-
-
     }
+
 
 
     private fun getPrices(distance : Double, time : Double){
@@ -153,7 +148,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
                 val minTotalString = String.format("%.1f",minTotal)
                 val maxTotalString = String.format("%.1f",maxTotal)
 
-                binding.textViewPrecio.text = "S/$minTotalString - $maxTotalString"
+                binding.textViewPrecio.text = "S/$minTotalString - S/$maxTotalString"
             }
         }
     }
@@ -256,7 +251,7 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
 
         getPrices(distance,time)
 
-        binding.textViewTimeAndDistance.text = "$timeFormat mins - $distanceFormat km"
+        binding.textViewTimeAndDistance.text = "$timeFormat mins\n$distanceFormat km"
 
 
         directionUtil.drawPath(WAY_POINT_TAG)
