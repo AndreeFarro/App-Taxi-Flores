@@ -7,8 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ListenerRegistration
+import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentSearchBinding
 import com.uns.taxiflores.models.Booking
 import com.uns.taxiflores.providers.AuthProvider
@@ -18,6 +21,7 @@ import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
 
 class SearchFragment : Fragment() {
 
+    private var listenerBooking: ListenerRegistration? = null
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
@@ -63,12 +67,47 @@ class SearchFragment : Fragment() {
             originLatLng = LatLng(extraOrigin_lat, extraOrigin_lng)
             destinationLatLng = LatLng(extraDestination_lat, extraDestination_lng)
             getClosestDriver()
+            checkIfDriverAccept()
         }
 
         return binding.root
 
 
     }
+
+    private fun checkIfDriverAccept(){
+        listenerBooking= bookingProvider.getBooking().addSnapshotListener{snapshot, e->
+            if (e != null){
+                Log.d("FIRESTORE","ERROR: ${e.message}")
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()){
+                val booking = snapshot.toObject(Booking::class.java)
+
+                if (booking?.status == "accept"){
+                    Toast.makeText(context,"Viaje aceptado",Toast.LENGTH_SHORT).show()
+                    listenerBooking?.remove()
+                    goToMapTrip()
+                }
+                else if(booking?.status == "cancel"){
+                    Toast.makeText(context,"Viaje cancelado",Toast.LENGTH_SHORT).show()
+                    listenerBooking?.remove()
+                    goToMap()
+                }
+            }
+        }
+    }
+
+    private fun goToMapTrip(){
+        findNavController().navigate(R.id.action_search_to_mapTripFragment)
+    }
+    private fun goToMap(){
+        findNavController().navigate(R.id.action_search_to_map)
+
+
+    }
+
 
     private fun createBooking(idDriver: String){
         val booking = Booking(
@@ -138,6 +177,11 @@ class SearchFragment : Fragment() {
 
 
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        listenerBooking?.remove()
     }
 
 

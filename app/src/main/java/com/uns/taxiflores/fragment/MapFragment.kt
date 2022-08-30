@@ -36,6 +36,7 @@ import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentMapBinding
 import com.uns.taxiflores.models.DriverLocation
 import com.uns.taxiflores.providers.AuthProvider
+import com.uns.taxiflores.providers.BookingProvider
 import com.uns.taxiflores.providers.GeoProvider
 import com.uns.taxiflores.utils.CarMoveAnim
 import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
@@ -69,6 +70,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
     private var mapView: MapView? = null
 
+    private val bookingProvider = BookingProvider()
 
 
     override fun onCreateView(
@@ -103,7 +105,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
         ))
 
         startGooglePlaces()
-
+        removeBooking()
         binding.bntRequestTrip.setOnClickListener { goToTripInfo() }
     }
 
@@ -127,6 +129,10 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
                 }
             }
         }
+    }
+
+    private fun removeBooking(){
+        bookingProvider.remove()
     }
 
     private fun getNearbyDrivers(){
