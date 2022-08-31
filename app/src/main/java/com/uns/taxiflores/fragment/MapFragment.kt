@@ -34,6 +34,7 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentMapBinding
+import com.uns.taxiflores.models.Booking
 import com.uns.taxiflores.models.DriverLocation
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.BookingProvider
@@ -132,7 +133,15 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
     }
 
     private fun removeBooking(){
-        bookingProvider.remove()
+        bookingProvider.getBooking().get().addOnSuccessListener { document ->
+            if (document.exists()){
+                val booking = document.toObject(Booking::class.java)
+                if (booking?.status == "create" || booking?.status == "cancel"){
+                    bookingProvider.remove()
+                }
+            }
+        }
+
     }
 
     private fun getNearbyDrivers(){
