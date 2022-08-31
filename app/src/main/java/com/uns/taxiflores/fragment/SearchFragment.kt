@@ -100,10 +100,16 @@ class SearchFragment : Fragment() {
     }
 
     private fun goToMapTrip(){
-        findNavController().navigate(R.id.action_search_to_mapTripFragment)
+        /**
+         * navigate no realiza el cambio por historial retrasado en el mapa
+         */
+
+        fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,MapTripFragment())?.commit()
+        //findNavController().navigate(R.id.action_search_to_mapTripFragment)
     }
     private fun goToMap(){
-        findNavController().navigate(R.id.action_search_to_map)
+        fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,MapTripFragment())?.commit()
+        //findNavController().navigate(R.id.action_search_to_map)
 
 
     }
@@ -119,7 +125,7 @@ class SearchFragment : Fragment() {
             time = extraTime,
             km = extraDistance,
             originLat = extraOrigin_lat,
-            originLng = extraOrigin_lat,
+            originLng = extraOrigin_lng,
             destinationLat = extraDestination_lat,
             destinationLng = extraDestination_lng
         )
