@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
@@ -234,7 +235,8 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
 
             val tripInfoFragment = TripInfoFragment()
             tripInfoFragment.arguments = bundle
-            fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,tripInfoFragment)?.commit()
+            view?.findNavController()?.navigate(R.id.action_map_to_tripInfo,bundle)
+            //fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,tripInfoFragment)?.commit()
         }
         else{
             Toast.makeText(context,"Debes seleccionar el origen y el destino",Toast.LENGTH_LONG).show()

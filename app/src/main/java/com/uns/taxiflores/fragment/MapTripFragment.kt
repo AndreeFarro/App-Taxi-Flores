@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
 import com.example.easywaylocation.draw_path.DirectionUtil
@@ -37,10 +38,13 @@ import com.uns.taxiflores.models.Booking
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.BookingProvider
 import com.uns.taxiflores.providers.GeoProvider
+import com.uns.taxiflores.utils.CarMoveAnim
 
 
 class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.DirectionCallBack {
 
+    private var driverLocation: LatLng? = null
+    private var endLatLng: LatLng? = null
     private var listenerBooking: ListenerRegistration? = null
     private var markerDestination: Marker? = null
     private var originLatLng: LatLng? = null
@@ -65,6 +69,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
     private lateinit var directionUtil : DirectionUtil
 
     private var isDriverLocationFound = false
+    private var isBookingLoaded = false
 
 
     override fun onCreateView(
@@ -126,18 +131,33 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
                     Log.d("FIRESTORE","ERROR: ${e.message}")
                     return@addSnapshotListener
                 }
+
+                if(document?.get("l") == null) return@addSnapshotListener
+
+
+                if (driverLocation != null){
+                    endLatLng = driverLocation
+                }
+
                 var l = document?.get("l") as List<*>
                 val lat = l[0] as Double
                 val lng = l[1] as Double
-                val driverLocation = LatLng(lat,lng)
-                addDriverMarker(driverLocation)
 
-                markerDriver?.remove()
+
+                driverLocation = LatLng(lat,lng)
+                //markerDriver?.remove()
 
                 if (!isDriverLocationFound){
                     isDriverLocationFound=true
-                    easyDrawRoute(driverLocation,originLatLng!!)
+                    addDriverMarker(driverLocation!!)
+                    easyDrawRoute(driverLocation!!,originLatLng!!)
                 }
+
+                if (endLatLng != null && driverLocation != null && markerDriver != null){
+                    CarMoveAnim.carAnim(markerDriver!!, endLatLng!!,driverLocation!!)
+                }
+
+
                 Log.d("FIRESTORE","Location $l")
             }
         }
@@ -151,18 +171,46 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
             }
 
             booking = document?.toObject(Booking::class.java)
-            originLatLng = LatLng(booking?.originLat!!,booking?.originLng!!)
-            destinationLatLng = LatLng(booking?.destinationLat!!,booking?.destinationLng!!)
-            googleMap?.moveCamera(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.builder().target(originLatLng!!).zoom(17f).build()
+            if(booking == null) return@addSnapshotListener
+
+            if(!isBookingLoaded){
+                isBookingLoaded =true
+                originLatLng = LatLng(booking?.originLat!!,booking?.originLng!!)
+                destinationLatLng = LatLng(booking?.destinationLat!!,booking?.destinationLng!!)
+                googleMap?.moveCamera(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.builder().target(originLatLng!!).zoom(17f).build()
+                    )
                 )
-            )
-            getLocationDriver()
-            addOriginMarker(originLatLng!!)
+                getLocationDriver()
+                addOriginMarker(originLatLng!!)
+            }
+
+
+            when(booking?.status){
+                "accept" -> binding.textViewStatus.text = "Aceptado"
+                "started" -> startedTrip()
+                "finished" -> finishedTrip()
+            }
+
+
         }
     }
 
+    private fun finishedTrip(){
+        binding.textViewStatus.text ="Finalizado"
+        findNavController().navigate(R.id.action_mapTripFragment_to_map)
+    }
+
+    private fun startedTrip(){
+        googleMap?.clear()
+        if(driverLocation != null){
+            addDriverMarker(driverLocation!!)
+            addDestinationMarker()
+            easyDrawRoute(driverLocation!!,destinationLatLng!!)
+        }
+        binding.textViewStatus.text = "Iniciado"
+    }
 
     private fun addOriginMarker(position: LatLng){
         markerOrigin=googleMap?.addMarker(MarkerOptions().position(position).title("Recoger aqui!")

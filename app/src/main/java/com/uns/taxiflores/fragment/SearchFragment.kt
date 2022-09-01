@@ -7,12 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ListenerRegistration
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentSearchBinding
+import com.uns.taxiflores.fragments.MapTripFragment
 import com.uns.taxiflores.models.Booking
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.BookingProvider
@@ -104,12 +106,13 @@ class SearchFragment : Fragment() {
          * navigate no realiza el cambio por historial retrasado en el mapa
          */
 
-        fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,MapTripFragment())?.commit()
-        //findNavController().navigate(R.id.action_search_to_mapTripFragment)
+        //fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main, MapTripFragment())?.commit()
+        //view?.findNavController()?.navigate(R.id.action_map_to_tripInfo,bundle)
+        findNavController().navigate(R.id.action_search_to_mapTripFragment)
     }
     private fun goToMap(){
-        fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,MapTripFragment())?.commit()
-        //findNavController().navigate(R.id.action_search_to_map)
+        //fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,MapTripFragment())?.commit()
+        findNavController().navigate(R.id.action_search_to_map)
 
 
     }
@@ -131,9 +134,9 @@ class SearchFragment : Fragment() {
         )
         bookingProvider.create(booking).addOnCompleteListener{
             if (it.isSuccessful){
-                Toast.makeText(context, "Datos del viaje creados", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Datos del viaje creados", Toast.LENGTH_SHORT).show()
             }else{
-                Toast.makeText(context, "error al traer datos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "error al traer datos", Toast.LENGTH_SHORT).show()
             }
         }
     }

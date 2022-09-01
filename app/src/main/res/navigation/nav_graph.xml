@@ -68,9 +68,15 @@
             android:id="@+id/action_search_to_map"
             app:destination="@id/map" />
     </fragment>
+
     <fragment
         android:id="@+id/mapTripFragment"
-        android:name="com.uns.taxiflores.fragment.MapTripFragment"
+        android:name="com.uns.taxiflores.fragments.MapTripFragment"
         android:label="fragment_map_trip"
-        tools:layout="@layout/fragment_map_trip" />
+        tools:layout="@layout/fragment_map_trip">
+        <action
+            android:id="@+id/action_mapTripFragment_to_map"
+            app:destination="@id/map" />
+    </fragment>
+
 </navigation>

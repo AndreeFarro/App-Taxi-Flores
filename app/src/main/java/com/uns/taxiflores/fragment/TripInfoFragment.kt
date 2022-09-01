@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
@@ -123,7 +124,8 @@ class TripInfoFragment : Fragment() ,OnMapReadyCallback, Listener, DirectionUtil
             val searchFragment = SearchFragment()
             searchFragment.arguments = bundle
             //findNavController().navigate(R.id.action_tripInfo_to_search)
-            fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,searchFragment)?.commit()
+            view?.findNavController()?.navigate(R.id.action_tripInfo_to_search,bundle)
+            //fragmentManager?.beginTransaction()?.replace(R.id.fragment_content_main,searchFragment)?.commit()
 
         }
         else{
