@@ -43,6 +43,7 @@ import com.uns.taxiflores.utils.CarMoveAnim
 
 class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.DirectionCallBack {
 
+    private var listenerDriverLocation: ListenerRegistration? = null
     private var driverLocation: LatLng? = null
     private var endLatLng: LatLng? = null
     private var listenerBooking: ListenerRegistration? = null
@@ -126,7 +127,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
 
     private fun getLocationDriver(){
         if (booking != null){
-            geoProvider.getLocationWorking(booking?.idDriver!!).addSnapshotListener{document, e ->
+            listenerDriverLocation = geoProvider.getLocationWorking(booking?.idDriver!!).addSnapshotListener{document, e ->
                 if (e != null){
                     Log.d("FIRESTORE","ERROR: ${e.message}")
                     return@addSnapshotListener
@@ -139,26 +140,29 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
                     endLatLng = driverLocation
                 }
 
-                var l = document?.get("l") as List<*>
-                val lat = l[0] as Double
-                val lng = l[1] as Double
+                if (document?.exists()!!){
+                    var l = document?.get("l") as List<*>
+                    val lat = l[0] as Double
+                    val lng = l[1] as Double
 
 
-                driverLocation = LatLng(lat,lng)
-                //markerDriver?.remove()
+                    driverLocation = LatLng(lat,lng)
+                    //markerDriver?.remove()
 
-                if (!isDriverLocationFound){
-                    isDriverLocationFound=true
-                    addDriverMarker(driverLocation!!)
-                    easyDrawRoute(driverLocation!!,originLatLng!!)
+                    if (!isDriverLocationFound){
+                        isDriverLocationFound=true
+                        addDriverMarker(driverLocation!!)
+                        easyDrawRoute(driverLocation!!,originLatLng!!)
+                    }
+
+                    if (endLatLng != null && driverLocation != null && markerDriver != null){
+                        CarMoveAnim.carAnim(markerDriver!!, endLatLng!!,driverLocation!!)
+                    }
+
+
+                    Log.d("FIRESTORE","Location $l")
                 }
 
-                if (endLatLng != null && driverLocation != null && markerDriver != null){
-                    CarMoveAnim.carAnim(markerDriver!!, endLatLng!!,driverLocation!!)
-                }
-
-
-                Log.d("FIRESTORE","Location $l")
             }
         }
     }
@@ -198,6 +202,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
     }
 
     private fun finishedTrip(){
+        listenerDriverLocation?.remove()
         binding.textViewStatus.text ="Finalizado"
         findNavController().navigate(R.id.action_mapTripFragment_to_map)
     }
@@ -276,6 +281,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
     override fun onDestroy() {//CUANDO CERRAMOS LA APP O PASAMOS A OTRA ACTIVYTI
         super.onDestroy()
         listenerBooking?.remove()
+        listenerDriverLocation?.remove()
     }
 
 
