@@ -85,6 +85,10 @@
         android:id="@+id/calificationFragment"
         android:name="com.uns.taxiflores.fragment.CalificationFragment"
         android:label="fragment_calification"
-        tools:layout="@layout/fragment_calification" />
+        tools:layout="@layout/fragment_calification" >
+        <action
+            android:id="@+id/action_calificationFragment_to_map"
+            app:destination="@id/map" />
+    </fragment>
 
 </navigation>
