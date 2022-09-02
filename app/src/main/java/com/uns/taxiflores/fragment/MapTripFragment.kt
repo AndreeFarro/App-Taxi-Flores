@@ -155,7 +155,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
                         easyDrawRoute(driverLocation!!,originLatLng!!)
                     }
 
-                    if (endLatLng != null && driverLocation != null && markerDriver != null){
+                    if (endLatLng != null){
                         CarMoveAnim.carAnim(markerDriver!!, endLatLng!!,driverLocation!!)
                     }
 
@@ -204,7 +204,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
     private fun finishedTrip(){
         listenerDriverLocation?.remove()
         binding.textViewStatus.text ="Finalizado"
-        findNavController().navigate(R.id.action_mapTripFragment_to_map)
+        findNavController().navigate(R.id.action_mapTripFragment_to_calificationFragment)
     }
 
     private fun startedTrip(){
@@ -223,7 +223,7 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
     }
 
     private fun addDriverMarker(position: LatLng){
-        markerOrigin=googleMap?.addMarker(MarkerOptions().position(position).title("Tu conductor!")
+        markerDriver=googleMap?.addMarker(MarkerOptions().position(position).title("Tu conductor!")
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)))
     }
 

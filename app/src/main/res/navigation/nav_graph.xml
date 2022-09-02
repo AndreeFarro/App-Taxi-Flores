@@ -77,6 +77,14 @@
         <action
             android:id="@+id/action_mapTripFragment_to_map"
             app:destination="@id/map" />
+        <action
+            android:id="@+id/action_mapTripFragment_to_calificationFragment"
+            app:destination="@id/calificationFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/calificationFragment"
+        android:name="com.uns.taxiflores.fragment.CalificationFragment"
+        android:label="fragment_calification"
+        tools:layout="@layout/fragment_calification" />
 
 </navigation>
