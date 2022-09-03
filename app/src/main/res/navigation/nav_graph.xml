@@ -20,6 +20,17 @@
             app:destination="@id/map" />
     </fragment>
 
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.uns.taxiflores.fragment.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_map"
+            app:destination="@id/map" />
+    </fragment>
+
     <fragment
         android:id="@+id/register"
         tools:layout="@layout/fragment_register"
@@ -42,6 +53,12 @@
         <action
             android:id="@+id/action_map_to_tripInfo"
             app:destination="@id/tripInfo" />
+        <action
+            android:id="@+id/action_map_to_profileFragment"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_map_to_login"
+            app:destination="@id/login" />
     </fragment>
 
     <fragment

@@ -73,6 +73,7 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
     private var mapView: MapView? = null
 
     private val bookingProvider = BookingProvider()
+    private val modalMenu = ModalBottomSheetMenu()
 
 
     override fun onCreateView(
@@ -109,9 +110,12 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
         startGooglePlaces()
         removeBooking()
         binding.bntRequestTrip.setOnClickListener { goToTripInfo() }
+        binding.imageViewMenu.setOnClickListener { showModalMenu() }
     }
 
-
+    private fun showModalMenu(){
+        modalMenu.show(childFragmentManager,ModalBottomSheetMenu.TAG)
+    }
 
 
     val locationPermissions =registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
