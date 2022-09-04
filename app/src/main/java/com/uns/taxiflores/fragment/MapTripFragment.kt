@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.firestore.ListenerRegistration
 import com.uns.taxiflores.R
 import com.uns.taxiflores.databinding.FragmentMapTripBinding
+import com.uns.taxiflores.fragment.ModalBottomSheetTripInfo
 import com.uns.taxiflores.models.Booking
 import com.uns.taxiflores.providers.AuthProvider
 import com.uns.taxiflores.providers.BookingProvider
@@ -72,6 +73,9 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
     private var isDriverLocationFound = false
     private var isBookingLoaded = false
 
+    //MODAL
+    private var modalTrip = ModalBottomSheetTripInfo()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -99,6 +103,8 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
 
         easyWayLocation = EasyWayLocation(context, locationRequest, false, false, this)
 
+        binding.imageViewInfo.setOnClickListener { showModalInfo() }
+
         locationPermissions.launch(arrayOf(
             android.Manifest.permission.ACCESS_FINE_LOCATION,
             android.Manifest.permission.ACCESS_COARSE_LOCATION
@@ -122,6 +128,17 @@ class MapTripFragment : Fragment(), OnMapReadyCallback, Listener, DirectionUtil.
                     Log.d("LOCALIZACION","Permiso no Concedido")
                 }
             }
+        }
+    }
+
+    private fun showModalInfo(){
+        if (booking != null) {
+            val bundle = Bundle()
+            bundle.putString("booking", booking?.toJson())
+            modalTrip.arguments = bundle
+            modalTrip.show(childFragmentManager, ModalBottomSheetTripInfo.TAG)
+        }else{
+            Toast.makeText(context, "no se pudo cargar la informacion", Toast.LENGTH_SHORT).show()
         }
     }
 
