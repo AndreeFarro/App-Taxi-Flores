@@ -44,7 +44,7 @@ class ModalBottomSheetMenu: BottomSheetDialogFragment() {
         getClient()
         linearLayoutLogout?.setOnClickListener{goToMain()}
         linearLayoutProfile?.setOnClickListener { goMapToProfile() }
-        //linearLayoutHistory?.setOnClickListener { goToHistories()}
+        linearLayoutHistory?.setOnClickListener { goToHistories()}
 
         return view
     }
@@ -58,9 +58,9 @@ class ModalBottomSheetMenu: BottomSheetDialogFragment() {
         findNavController().navigate(R.id.action_map_to_profileFragment)
     }
 
-    //private fun goToHistories(){
-      //  findNavController().navigate(R.id.action_map_to_historiesFragment)
-    //}
+    private fun goToHistories(){
+        findNavController().navigate(R.id.action_map_to_historiesFragment)
+    }
 
     private fun goToMain(){
         authProvider.logout()

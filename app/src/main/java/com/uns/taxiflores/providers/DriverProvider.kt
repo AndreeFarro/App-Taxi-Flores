@@ -10,21 +10,22 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageTask
 import com.google.firebase.storage.UploadTask
+import com.uns.taxiflores.models.Driver
 import java.io.File
 
-class ClientProvider {
-    val db = Firebase.firestore.collection("Clients")
+class DriverProvider {
+    val db = Firebase.firestore.collection("Drivers")
     var storage = FirebaseStorage.getInstance().getReference().child("profile")
 
-
-    fun create(client: Client): Task<Void> {
-    return db.document(client.id!!).set(client)
-    }
-    fun getClientById(id: String): Task<DocumentSnapshot> {
-        return db.document(id).get()
+    fun create(driver: Driver): Task<Void> {
+    return db.document(driver.id!!).set(driver)
     }
 
-    fun uploadImage(id: String, file : File): StorageTask<UploadTask.TaskSnapshot> {
+    fun getDriver(idDriver: String): Task<DocumentSnapshot> {
+        return db.document(idDriver).get()
+    }
+
+    fun uploadImage(id: String, file : File): StorageTask<UploadTask.TaskSnapshot>{
         var fromFile = Uri.fromFile(file)
         val ref = storage.child("$id.jpg")
         storage = ref
@@ -39,14 +40,16 @@ class ClientProvider {
         return storage.downloadUrl
     }
 
-    fun update(client: Client): Task<Void>{
+    fun update(driver: Driver): Task<Void>{
         val map : MutableMap<String,Any> = HashMap()
-        map["name"] = client.name!!
-        map["lastName"] = client.lastName!!
-        map["phone"] = client.phone!!
-        map["image"] = client.image!!
+        map["name"] = driver.name!!
+        map["lastName"] = driver.lastName!!
+        map["phone"] = driver.phone!!
+        map["colorCar"] = driver.colorCar!!
+        map["brandCar"] = driver.brandCar!!
+        map["plateNumber"] = driver.plateNumber!!
+        map["image"] = driver.image!!
 
-        return db.document(client.id!!).update(map)
+        return db.document(driver.id!!).update(map)
     }
-
 }

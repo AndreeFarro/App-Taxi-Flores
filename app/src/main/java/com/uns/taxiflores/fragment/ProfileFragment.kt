@@ -25,6 +25,7 @@ import java.io.File
 
 class ProfileFragment : Fragment() {
 
+    private var afterImageProfile: String = ""
     val clientProvider = ClientProvider()
     val authProvider = AuthProvider()
     private val modalMenu = ModalBottomSheetMenu()
@@ -64,7 +65,7 @@ class ProfileFragment : Fragment() {
             name = name,
             lastName = lastName,
             phone = phone,
-
+            image = afterImageProfile
         )
 
         if (imageFile != null){
@@ -72,12 +73,12 @@ class ProfileFragment : Fragment() {
                 clientProvider.getImageUrl().addOnSuccessListener { url ->
                     val imageUrl = url.toString()
                     client.image = imageUrl
-                    clientProvider.update(client)
+                    update(client)
                     Log.d("STORAGE", "URL: ${imageUrl}")
                 }
             }
         }else{
-            clientProvider.update(client)
+            update(client)
         }
 
     }
@@ -100,6 +101,7 @@ class ProfileFragment : Fragment() {
                 binding.textFieldName.setText(client?.name)
                 binding.textFieldLastName.setText(client?.lastName)
                 binding.textFieldPhone.setText(client?.phone)
+                afterImageProfile = client?.image!!
                if (client?.image != null){
                     if (client.image != ""){
                         Glide.with(requireContext()).load(client.image).into(binding.circleImageProfile)

@@ -59,6 +59,9 @@
         <action
             android:id="@+id/action_map_to_login"
             app:destination="@id/login" />
+        <action
+            android:id="@+id/action_map_to_historiesFragment"
+            app:destination="@id/historiesFragment" />
     </fragment>
 
     <fragment
@@ -107,5 +110,25 @@
             android:id="@+id/action_calificationFragment_to_map"
             app:destination="@id/map" />
     </fragment>
-
+    <fragment
+        android:id="@+id/historiesFragment"
+        android:name="com.uns.taxiflores.fragment.HistoriesFragment"
+        android:label="fragment_histories"
+        tools:layout="@layout/fragment_histories" >
+        <action
+            android:id="@+id/action_historiesFragment_to_historiesDetailFragment"
+            app:destination="@id/historiesDetailFragment" />
+        <action
+            android:id="@+id/action_historiesFragment_to_map"
+            app:destination="@id/map" />
+    </fragment>
+    <fragment
+        android:id="@+id/historiesDetailFragment"
+        android:name="com.uns.taxiflores.fragment.HistoriesDetailFragment"
+        android:label="fragment_histories_detail"
+        tools:layout="@layout/fragment_histories_detail" >
+        <action
+            android:id="@+id/action_historiesDetailFragment_to_historiesFragment"
+            app:destination="@id/historiesFragment" />
+    </fragment>
 </navigation>
