@@ -141,9 +141,9 @@ class MapFragment : Fragment(), OnMapReadyCallback, Listener {
         bookingProvider.getBooking().get().addOnSuccessListener { document ->
             if (document.exists()){
                 val booking = document.toObject(Booking::class.java)
-                if (booking?.status == "create" || booking?.status == "cancel"){
+
                     bookingProvider.remove()
-                }
+
             }
         }
 

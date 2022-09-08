@@ -1,6 +1,7 @@
 package com.uns.taxiflores.fragment
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -30,10 +31,7 @@ class ModalBottomSheetTripInfo: BottomSheetDialogFragment() {
     var textViewClientName : TextView? = null
     var textViewOrigin : TextView? = null
     var textViewDestination : TextView? = null
-    var imageViewPhone : ImageView? = null
     var circleImageClient : CircleImageView? = null
-
-    val REQUEST_PHONE_CALL = 30
 
 
     override fun onCreateView(
@@ -65,6 +63,7 @@ class ModalBottomSheetTripInfo: BottomSheetDialogFragment() {
 
 
 
+    @SuppressLint("SetTextI18n")
     private fun getDriver(){
         driverProvider.getDriver(booking.idDriver!!).addOnSuccessListener { document ->
             if (document.exists()){

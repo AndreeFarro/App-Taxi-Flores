@@ -6,7 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".fragment.HistoriesFragment">
 
-    <include android:id="@+id/toolbar" layout="@layout/toolbar"/>
+    <ImageView
+        android:id="@+id/imageViewBack"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:src="@drawable/ic_menu"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="15dp"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewHistories"

@@ -35,7 +35,7 @@ class HistoryProvider {
     }
 
     fun updateCalificationToDriver(id : String, calification: Float): Task<Void>{
-        return db.document(id).update("calificacionToDriver", calification).addOnFailureListener { e->
+        return db.document(id).update("calificationToDriver", calification).addOnFailureListener { e->
             Log.d("FIRESTORE", "calification: ${e.message}")
         }
     }

@@ -26,14 +26,14 @@
             android:textSize="23sp"
             android:layout_marginTop="30dp"
             />
+
         <ImageView
             android:id="@+id/imageViewBack"
-            android:layout_width="25dp"
+            android:layout_width="35dp"
             android:layout_height="25dp"
-            android:layout_marginTop="30dp"
             android:layout_marginLeft="15dp"
-            android:src="@drawable/ic_person"
-            />
+            android:layout_marginTop="30dp"
+            android:src="@drawable/ic_menu" />
 
 
         <de.hdodenhof.circleimageview.CircleImageView

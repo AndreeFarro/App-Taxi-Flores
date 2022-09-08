@@ -119,6 +119,8 @@ class SearchFragment : Fragment() {
 
 
     private fun createBooking(idDriver: String){
+
+
         val booking = Booking(
         idClient = authProvider.getId(),
             idDriver = idDriver,

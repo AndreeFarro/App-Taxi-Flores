@@ -32,16 +32,19 @@ class CalificationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.ratinBar.setOnRatingBarChangeListener { ratingBar, value, b ->
-            calification = value
-        }
+
         binding.btnCalfication.setOnClickListener{
             if(history?.id != null){
-                updateCalificationClient(history?.id!!)
+                calification = binding.ratinBar.numStars.toFloat()
+                updateCalificationDriver(history?.id!!)
+
             }else{
                 Toast.makeText(context, "el id del historial es nulo", Toast.LENGTH_SHORT).show()
             }
 
+        }
+        binding.ratinBar.setOnRatingBarChangeListener { ratingBar, value, b ->
+            calification = value
         }
         getHistory()
     }
@@ -64,7 +67,7 @@ class CalificationFragment : Fragment() {
         }
     }
 
-    private fun updateCalificationClient(id: String){
+    private fun updateCalificationDriver(id: String){
         historyProvider.updateCalificationToDriver(id, calification).addOnCompleteListener{
             if (it.isSuccessful){
                 gotoMap()
